@@ -1,0 +1,217 @@
+//Program 2
+
+//Tristan Sizik
+//818006833
+//3.13.18
+
+//Professor Riggins
+
+package data_structures;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
+public class OrderedLinkedListPriorityQueue<E extends Comparable<E>> implements PriorityQueue<E> {
+	
+	private int currSize;
+	private Node<E> head;
+	
+	private Node<E> tracker;
+	
+	private class Node<E>{
+		public Node<E> next;
+		public E data;
+		
+		public Node(E obj)
+		{
+			data = obj;
+			next = null;
+		}
+	}
+	
+	public OrderedLinkedListPriorityQueue()
+	{
+		head = null;
+	}
+	
+//  Inserts a new object into the priority queue.  Returns true if
+    //  the insertion is successful.  If the PQ is full, the insertion
+    //  is aborted, and the method returns false.
+    public boolean insert(E object)
+    {
+    	Node<E> newVal = new Node<E>(object);
+    	tracker = head;                            //work in progress
+    	
+    	if(isEmpty())
+    	{    		
+    		head = newVal;
+    		currSize++;
+    		return true;
+    	}
+    	
+    	for(int i = 0; i < currSize; i++)
+    	{
+    		if(tracker == head &&  ( (Comparable<E>)head.data).compareTo(object) > 0)				//head > obj									//if head bigger than input. replaces head.
+    		{    			
+    			newVal.next = head;
+    			head = newVal;
+    			currSize++;
+    			return true;
+    		}
+    		
+    		if( tracker.next == null)
+    		{    			
+    			tracker.next = newVal;
+    			currSize++;
+    			return true;
+    		}
+    		
+    		if( ( (Comparable<E>)tracker.next.data).compareTo(object) > 0)
+    		{    			
+    			newVal.next = tracker.next;
+    			tracker.next = newVal;
+    			currSize++;
+    			return true;
+    		}
+    		
+    		tracker = tracker.next;
+    	}
+    	
+    	return true;
+    }
+   
+    //  Removes the object of highest priority that has been in the
+    //  PQ the longest, and returns it.  Returns null if the PQ is empty.
+    public E remove()
+    {
+    	if(isEmpty())
+    	{
+    		return null;
+    	}
+    	
+    	E temp = head.data;
+    	head = head.next;
+    	currSize--;
+    	
+    	return temp;
+    }
+    
+    //  Deletes all instances of the parameter obj from the PQ if found, and
+    //  returns true.  Returns false if no match to the parameter obj is found.
+    public boolean delete(E obj)
+    {
+    	if(isEmpty())
+    		return false;
+    	
+    	Node<E> n1 = head;
+    		
+    	tracker = head;
+    	
+    	//tracker will go ahead, n1 will hold prev value.
+    	//ordered, so all of same values should be in consecutive order, drive tracker will find value that matches obj,
+    	//n1 will stay at the value previous from that, then tracker will go ahead and find the next address of unmatched obj
+    	//and link those two nodes.
+    	
+    	while( ( (Comparable<E>)tracker.next.data).compareTo(obj)  < 0)		//ordered, thus tracker goes until finding a val
+    	{																		//greater than or equal to, then next eval
+    		tracker = tracker.next;												//occurs. true if match is found, otherwise
+    	}																		//goes straight to false.
+    	
+    	if( ( (Comparable<E>)tracker.next.data).compareTo(obj) == 0)
+    	{
+    		n1 = tracker;
+    		while( ( (Comparable<E>)tracker.next.data).compareTo(obj)  == 0)  
+        	{																		
+        		tracker = tracker.next;
+        		currSize--;
+        	}
+    		n1.next = tracker.next;
+    		return true;
+    	}
+    	 
+    	
+    	return false;
+    }
+   
+    //  Returns the object of highest priority that has been in the
+    //  PQ the longest, but does NOT remove it. 
+    //  Returns null if the PQ is empty.
+    public E peek()
+    {
+    	return head.data;
+    }
+    
+    //  Returns true if the priority queue contains the specified element
+    //  false otherwise.
+    public boolean contains(E obj)
+    {
+    	tracker = head;
+    	
+    	//if we are able to jump out while loop, value is found.
+    	while( ( (Comparable<E>)tracker.data).compareTo(obj) != 0)
+    	{
+    		if( tracker.next == null)
+    			return false;
+    		tracker = tracker.next;
+    	}
+    	
+    	return true;
+    }
+   
+    //  Returns the number of objects currently in the PQ.
+    public int size()
+    {
+    	return currSize;
+    }
+      
+    //  Returns the PQ to an empty state.
+    public void clear()
+    {
+    	head = null;
+    	currSize = 0;
+    }
+   
+    //  Returns true if the PQ is empty, otherwise false
+    public boolean isEmpty()
+    {
+    	return currSize == 0;
+    }
+   
+    //  Returns true if the PQ is full, otherwise false.  List based
+    //  implementations should always return false.
+    public boolean isFull()
+    {
+    	return false; //linked list is never empty
+    }
+    
+    //  Returns an iterator of the objects in the PQ, in no particular
+    //  order.  
+    public Iterator<E> iterator()
+    {
+    	return (Iterator<E>) new IteratorHelper<E>();
+    }
+	
+    class IteratorHelper<E> implements Iterator<E> 
+    {
+    	 
+    	public IteratorHelper() {
+    		tracker = head;
+    	}
+    	 
+    	public E next() {
+    		if (!hasNext())
+    			throw new NoSuchElementException();
+    		tracker = tracker.next;
+    		return (E) tracker.data;
+    	}
+    	
+    	public boolean hasNext() {
+    		return (tracker!= null && tracker.next != null);
+    	}
+    	 
+    	public void remove() {
+    		throw new UnsupportedOperationException();
+    	}
+     }
+	
+	
+}
